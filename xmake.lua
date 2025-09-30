@@ -5,8 +5,8 @@ set_xmakever("2.8.2")
 includes("lib/commonlibsse-ng")
 
 -- set project
-set_project("commonlibsse-ng-template")
-set_version("0.0.0")
+set_project("drop-chances")
+set_version("1.0.0")
 set_license("GPL-3.0")
 
 -- set defaults
@@ -14,22 +14,28 @@ set_languages("c++23")
 set_warnings("allextra")
 
 -- set policies
+set_policy("build.optimization.lto", true)
 set_policy("package.requires_lock", true)
+
+-- set configs
+set_config("commonlib_json", true)
+set_config("commonlib_toml", true)
+set_config("rex_json", true)
+set_config("rex_toml", true)
 
 -- add rules
 add_rules("mode.debug", "mode.releasedbg")
 add_rules("plugin.vsxmake.autoupdate")
 
 -- targets
-target("commonlibsse-ng-template")
+target("drop-chances")
     -- add dependencies to target
     add_deps("commonlibsse-ng")
 
     -- add commonlibsse-ng plugin
     add_rules("commonlibsse-ng.plugin", {
-        name = "commonlibsse-ng-template",
-        author = "qudix",
-        description = "SKSE64 plugin template using CommonLibSSE-NG"
+        name = "drop-chances",
+        author = "styyx",
     })
 
     -- add src files
