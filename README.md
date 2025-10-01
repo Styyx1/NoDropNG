@@ -1,6 +1,7 @@
-# CommonLibSSE-NG Plugin Template
+# Prevent Overabundance of Plunder
 
-This is a basic plugin template using CommonLibSSE-NG.
+A mod that prevents some gear from dropping.   
+[nexus link](https://www.nexusmods.com/skyrimspecialedition/mods/160397)
 
 ### Requirements
 * [XMake](https://xmake.io) [2.8.2+]
@@ -8,8 +9,8 @@ This is a basic plugin template using CommonLibSSE-NG.
 
 ## Getting Started
 ```bat
-git clone --recurse-submodules https://github.com/libxse/commonlibsse-ng-template
-cd commonlibsse-ng-template
+git clone https://github.com/Styyx1/NoDropNG --recursive
+cd NoDropNG
 ```
 
 ### Build
@@ -41,6 +42,3 @@ If you want to upgrade the project's dependencies, run the following commands:
 xmake repo --update
 xmake require --upgrade
 ```
-
-## Documentation
-Please refer to the [Wiki](../../wiki/Home) for more advanced topics.
