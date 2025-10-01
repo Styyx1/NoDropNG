@@ -1,6 +1,6 @@
 # Prevent Overabundance of Plunder
 
-A mod that prevents some gear from dropping.
+A mod that prevents some gear from dropping.   
 [nexus link](https://www.nexusmods.com/skyrimspecialedition/mods/160397)
 
 ### Requirements
