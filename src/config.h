@@ -52,6 +52,7 @@ namespace Config {
 		static inline REX::TOML::I32 drop_removal_chance_jewelry{ "Drops.Settings", "iDontDropJewelryChance", 50 };
 		static inline REX::TOML::Bool replace_armors{ "Drops.Settings", "bReplaceArmors", true };
 		static inline REX::TOML::Bool load_replacer_json{ "Drops.Settings", "bLoadReplacerJson", true };  
+		static inline REX::TOML::Bool log_to_file{ "Logging", "bLogToFile", false };
 
 		void Update() {
 			logs::info("Loading settings...");

@@ -66,16 +66,23 @@ namespace Hooks
 				continue;
 			}
 			if (item.second.second.get() && item.second.second.get()->GetEnchantment() != nullptr) {
-				logs::info("Skipping {} because it's enchanted", item.first->GetName());
+				if (Config::Settings::log_to_file.GetValue()) {
+					logs::info("Skipping {} because it's enchanted", item.first->GetName());
+				}				
 				continue;
 			}
 			if (FormLoader::Forms::exception_formlist && FormLoader::Forms::exception_formlist->HasForm(item.first)) {
-				logs::info("Skipping {} because it's in the exception list", item.first->GetName());
+				if (Config::Settings::log_to_file.GetValue()) {
+					logs::info("Skipping {} because it's in the exception list", item.first->GetName());
+				}				
 				continue;
 			}
 
 			if (FormLoader::Forms::exception_formlist_keyword && item.first->HasKeywordInList(FormLoader::Forms::exception_formlist_keyword, false)) {
-				logs::info("Skipping {} because it has an exception keyword", item.first->GetName());
+				if (Config::Settings::log_to_file.GetValue()) {
+					logs::info("Skipping {} because it has an exception keyword", item.first->GetName());
+				}
+				continue;
 			}
 
 			auto entryData = item.second.second.get();
@@ -84,14 +91,20 @@ namespace Hooks
 				if (entryData->IsWorn()) {
 					if (item.first->As<RE::TESObjectWEAP>()->GetPlayable()) {
 						if (item.second.second.get()->IsQuestObject()) {
-							logs::info("Skipping {} because it's a quest item", item.first->GetName());
+							if (Config::Settings::log_to_file.GetValue()) {
+								logs::info("Skipping {} because it's a quest item", item.first->GetName());
+							}							
 							continue;
 						}
 						int chance = Config::Settings::drop_removal_chance_armor.GetValue();
-						logs::info("Chance to remove {} from {} is {}%", item.first->GetName(), actor->GetName(), chance);
+						if (Config::Settings::log_to_file.GetValue()) {
+							logs::info("Chance to remove {} from {} is {}%", item.first->GetName(), actor->GetName(), chance);
+						}
 						if (Util::RandomGenerator::GetRandomFloat(0.0f, 100.0f) < static_cast<float>(chance)) {
 							actor->RemoveItem(item.first, item.second.first, RE::ITEM_REMOVE_REASON::kRemove, nullptr, nullptr);
-							logs::info("Removed {} from {}", item.first->GetName(), actor->GetName());
+							if (Config::Settings::log_to_file.GetValue()) {
+								logs::info("Removed {} from {}", item.first->GetName(), actor->GetName());
+							}							
 						}
 					}
 				}
@@ -100,7 +113,9 @@ namespace Hooks
 				if (entryData->IsWorn()) {
 					if (item.first->As<RE::TESObjectARMO>()->GetPlayable()) {
 						if (item.second.second.get()->IsQuestObject()) {
-							logs::info("Skipping {} because it's a quest item", item.first->GetName());
+							if (Config::Settings::log_to_file.GetValue()) {
+								logs::info("Skipping {} because it's a quest item", item.first->GetName());
+							}
 							continue;
 						}
 						int chance = 0;
@@ -109,14 +124,17 @@ namespace Hooks
 						}
 						else
 							chance = Config::Settings::drop_removal_chance_armor.GetValue();
-
-						logs::info("Chance to remove {} from {} is {}%", item.first->GetName(), actor->GetName(), chance);
+						if (Config::Settings::log_to_file.GetValue()) {
+							logs::info("Chance to remove {} from {} is {}%", item.first->GetName(), actor->GetName(), chance);
+						}						
 						if (Util::RandomGenerator::GetRandomFloat(0.0f, 100.0f) < static_cast<float>(chance)) {
 							if (Config::Settings::replace_armors.GetValue()) {
 								dropData->itemsToRemove[actor].insert(item.first);
 							}
 							actor->RemoveItem(item.first, item.second.first, RE::ITEM_REMOVE_REASON::kRemove, nullptr, nullptr);
-							logs::info("Removed {} from {}", item.first->GetName(), actor->GetName());
+							if (Config::Settings::log_to_file.GetValue()) {
+								logs::info("Removed {} from {}", item.first->GetName(), actor->GetName());
+							}
 						}
 					}
 				}
