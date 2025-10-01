@@ -2,6 +2,26 @@
 
 namespace Util {
 
+    bool ActorHasQuestObjectEquipped(RE::Actor* actor) {
+        if (actor) {
+            auto* rightHandItem = actor->GetEquippedEntryData(false);
+            if (rightHandItem) {
+                if (rightHandItem->IsQuestObject()) {
+                    return true;
+                }
+            }
+
+            auto* leftHandItem = actor->GetEquippedEntryData(true);
+            if (leftHandItem) {
+                if (leftHandItem->IsQuestObject()) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
     inline static bool IsQuestItem(const RE::TESObjectREFR* a_ref)
     {
         if (const auto xAliases = a_ref->extraList.GetByType<RE::ExtraAliasInstanceArray>(); xAliases) {

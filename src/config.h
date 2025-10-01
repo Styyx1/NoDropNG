@@ -26,12 +26,19 @@ namespace FormLoader {
 		static inline RE::BGSListForm* exception_formlist_keyword{ nullptr };
 
 		static void LoadForms() {
+			logs::info("Loading forms...");
 			const auto& dataHandler = RE::TESDataHandler::GetSingleton();
 			using namespace LoaderConstants;
 			rags_chest = dataHandler->LookupForm<RE::TESObjectARMO>(rags_chest_ID, plugin_name);
 			rags_legs = dataHandler->LookupForm<RE::TESObjectARMO>(rags_legs_ID, plugin_name);
 			exception_formlist = dataHandler->LookupForm<RE::BGSListForm>(exception_formlist_ID, plugin_name);
 			exception_formlist_keyword = dataHandler->LookupForm<RE::BGSListForm>(exception_formlist_keyword_ID, plugin_name);
+
+			if (!rags_chest || !rags_legs || !exception_formlist || !exception_formlist_keyword) {
+				logs::error("Failed to load one or more forms from {}", plugin_name);
+			} else {
+				logs::info("Successfully loaded all forms from {}", plugin_name);
+			}
 		}
 	};
 }
@@ -43,12 +50,15 @@ namespace Config {
         static inline REX::TOML::I32 drop_removal_chance_weapons{ "Drops.Settings", "iDontDropWeapChance", 50 };
 		static inline REX::TOML::I32 drop_removal_chance_armor{ "Drops.Settings", "iDontDropArmorChance", 50 };
 		static inline REX::TOML::I32 drop_removal_chance_jewelry{ "Drops.Settings", "iDontDropJewelryChance", 50 };
+		static inline REX::TOML::Bool replace_armors{ "Drops.Settings", "bReplaceArmors", true };
 		static inline REX::TOML::Bool load_replacer_json{ "Drops.Settings", "bLoadReplacerJson", true };  
 
 		void Update() {
+			logs::info("Loading settings...");
 			const auto toml = REX::TOML::SettingStore::GetSingleton();
 			toml->Init(Constants::toml_path_default.data(), Constants::toml_path_custom.data());
 			toml->Load();
+			logs::info("...Settings loaded");
 		}
 		void SaveSettings() {
 			const auto toml = REX::TOML::SettingStore::GetSingleton();
