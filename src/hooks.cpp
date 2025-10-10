@@ -65,12 +65,15 @@ namespace Hooks
 			if (!item.first || !item.second.first || item.second.first <= 0) {
 				continue;
 			}
-			if (item.second.second.get() && item.second.second.get()->GetEnchantment() != nullptr) {
-				if (Config::Settings::log_to_file.GetValue()) {
-					logs::info("Skipping {} because it's enchanted", item.first->GetName());
-				}				
-				continue;
+			if (Config::Settings::always_drop_enchanted.GetValue()) {
+				if (item.second.second.get() && item.second.second.get()->GetEnchantment() != nullptr) {
+					if (Config::Settings::log_to_file.GetValue()) {
+						logs::info("Skipping {} because it's enchanted", item.first->GetName());
+					}
+					continue;
+				}
 			}
+			
 			if (FormLoader::Forms::exception_formlist && FormLoader::Forms::exception_formlist->HasForm(item.first)) {
 				if (Config::Settings::log_to_file.GetValue()) {
 					logs::info("Skipping {} because it's in the exception list", item.first->GetName());
