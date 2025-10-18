@@ -3,7 +3,6 @@ set_xmakever("2.8.2")
 
 -- includes
 includes("lib/commonlibsse-ng")
-includes("extern")
 
 -- set project
 set_project("drop-chances")
@@ -47,3 +46,4 @@ target("drop-chances")
     add_headerfiles("src/**.h")
     add_includedirs("src")
     set_pcxxheader("src/pch.h")
+    add_includedirs("extern/clib-utils/include", {public = true})

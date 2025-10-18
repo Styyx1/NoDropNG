@@ -9,7 +9,7 @@
 #include <nlohmann/json.hpp>
 
 namespace UtilConstants {
-	inline std::filesystem::path replacementFile = "Data/SKSE/Plugins/DropReplacer.json";
+	inline std::filesystem::path replacementFolder = "Data/SKSE/Plugins/DropReplacer";
 }
 
 namespace Util {
@@ -67,49 +67,50 @@ namespace Util {
             return distrib(GetRNG());
         }
 	};
-
-
-
+    
     namespace LoaderUtil {
 
         
 
         struct FormUtils {
 
-            // Convert a string like "Skyrim.esm|0x12345" -> TESForm*
             static inline RE::TESForm* get_form_from_string(const std::string& formIDstring)
             {
-                std::istringstream ss{ formIDstring };
-                std::string plugin, id;
-
-                std::getline(ss, plugin, '|');
-                std::getline(ss, id);
-
-                if (plugin.empty() || id.empty()) {
-                    logs::warn("Invalid form string: '{}'", formIDstring);
+                if (formIDstring.empty()) {
+                    logs::warn("Empty form string");
                     return nullptr;
                 }
 
-                RE::FormID rawFormID{};
-                std::istringstream(id) >> std::hex >> rawFormID;
+                if (formIDstring.find('|') != std::string::npos) {
+                    std::istringstream ss{ formIDstring };
+                    std::string plugin, id;
+                    std::getline(ss, plugin, '|');
+                    std::getline(ss, id);
 
-                if (!rawFormID) {
-                    logs::warn("Invalid formID '{}' in string '{}'", id, formIDstring);
+                    if (plugin.empty() || id.empty()) {
+                        return nullptr;
+                    }
+
+                    RE::FormID rawFormID{};
+                    std::istringstream(id) >> std::hex >> rawFormID;
+
+                    if (!rawFormID) {
+                        return nullptr;
+                    }
+
+                    if (auto* dataHandler = RE::TESDataHandler::GetSingleton()) {
+                        auto* form = dataHandler->LookupForm(rawFormID, plugin);
+                        return form;
+                    }
                     return nullptr;
                 }
 
-                auto* dataHandler = RE::TESDataHandler::GetSingleton();
-                if (!dataHandler) {
-                    SKSE::stl::report_and_fail(std::format("TESDataHandler not available while parsing '{}'", formIDstring));
-                    return nullptr;
+                if (auto* form = RE::TESForm::LookupByEditorID(formIDstring)) {
+                    return form;
                 }
 
-                auto* form = dataHandler->LookupForm(rawFormID, plugin);
-                if (!form) {
-                    logs::warn("Failed to find form '{}'", formIDstring);
-                }
-
-                return form;
+                logs::warn("Could not find form '{}'", formIDstring);
+                return nullptr;
             }
         };
 
@@ -119,12 +120,12 @@ namespace Util {
 
             using json = nlohmann::json;
 
-            // Load a JSON file from disk safely
             static json load_json(const std::filesystem::path& path)
             {
+                const std::string pathName = path.string();
                 std::ifstream file(path);
                 if (!file.is_open()) {
-                    logs::error("Could not open JSON file '{}'", path.string());
+                    logs::error("Could not open JSON file '{}'", pathName);
                     return {};
                 }
 
@@ -133,13 +134,12 @@ namespace Util {
                     file >> j;
                 }
                 catch (const std::exception& e) {
-                    logs::error("Failed to parse JSON '{}': {}", path.string(), e.what());
+                    logs::error("Failed to parse JSON '{}': {}", pathName, e.what());
                     return {};
                 }
                 return j;
             }
 
-            // Load an array of form strings into a container (like std::unordered_set<RE::TESForm*>)
             template <typename Container>
             static void load_forms_from_json(Container& container,
                 const std::filesystem::path& path,
@@ -147,7 +147,6 @@ namespace Util {
             {
                 auto j = load_json(path);
                 if (!j.contains(key) || !j[key].is_array()) {
-                    logs::warn("Missing or invalid key '{}' in '{}'", key, path.string());
                     return;
                 }
 
@@ -164,14 +163,14 @@ namespace Util {
                         logs::debug("Loaded form '{}'", formStr);
                     }
                     else {
-                        logs::warn("Invalid form '{}'", formStr);
+
+                            logs::warn("Invalid form '{}'", formStr);
                     }
                 }
 
                 logs::info("Loaded {} valid forms from '{}'", container.size(), path.string());
             }
 
-            /// Load key-value pairs of forms into a map (e.g. std::unordered_map<RE::TESForm*, RE::TESForm*>)
             template <typename Map>
             static void load_form_pairs_from_json(Map& map,
                 const std::filesystem::path& path,
@@ -179,7 +178,6 @@ namespace Util {
             {
                 auto j = load_json(path);
                 if (!j.contains(key) || !j[key].is_object()) {
-                    logs::warn("Missing or invalid key '{}' in '{}'", key, path.string());
                     return;
                 }
 
@@ -193,21 +191,53 @@ namespace Util {
 
                     if (src && dst) {
                         map[src] = dst;
-                        logs::debug("Loaded form pair: '{}' -> '{}'", srcStr, dstVal.get<std::string>());
-                    }
-                    else {
-                        logs::warn("Invalid form pair: '{}' -> '{}'", srcStr, dstVal.get<std::string>());
                     }
                 }
+                const std::string pathName = path.string();
+                logs::info("Loaded {} form pairs from '{}'", map.size(), pathName);
+            }
 
-                logs::info("Loaded {} form pairs from '{}'", map.size(), path.string());
+            static void load_form_pairs_from_folder(std::unordered_map<RE::TESForm*, RE::TESForm*>& map,
+                const std::filesystem::path& folder,
+                std::string_view key)
+            {
+                const std::string pathName = folder.string();
+
+                if (!std::filesystem::exists(folder) || !std::filesystem::is_directory(folder)) {
+                    logs::warn("Folder '{}' does not exist or is not a directory.", pathName);
+                    return;
+                }
+
+                size_t totalCount = 0;
+
+                for (const auto& entry : std::filesystem::directory_iterator(folder)) {
+                    if (!entry.is_regular_file())
+                        continue;
+
+                    const auto& path = entry.path();
+                    if (path.extension() != ".json")
+                        continue;
+
+                    logs::info("Loading replacement data from '{}'", pathName);
+
+                    std::unordered_map<RE::TESForm*, RE::TESForm*> temp;
+                    JSONLoader::load_form_pairs_from_json(temp, path, key);
+
+                    totalCount += temp.size();
+
+                    // Merge temp into main map (overwriting duplicates)
+                    map.insert(temp.begin(), temp.end());
+                }
+
+                logs::info("Loaded {} total replacements from folder '{}'", totalCount, pathName);
             }
 
             static void LoadReplacements()
             {
                 loadedReplacements.clear();
-                JSONLoader::load_form_pairs_from_json(loadedReplacements, UtilConstants::replacementFile, "replacements");
-                logs::info("Loaded {} replacements from '{}'", loadedReplacements.size(), UtilConstants::replacementFile.string());
+                JSONLoader::load_form_pairs_from_folder(loadedReplacements, UtilConstants::replacementFolder, "replacements");
+                const std::string path = UtilConstants::replacementFolder.string();
+                logs::info("Loaded {} replacements from '{}'", loadedReplacements.size(), path);
             }
 
         };
