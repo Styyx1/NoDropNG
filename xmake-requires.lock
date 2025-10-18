@@ -35,6 +35,14 @@
             },
             version = "1.12.1"
         },
+        ["nlohmann_json#0410d5ba"] = {
+            repo = {
+                branch = "master",
+                commit = "a46d11e468ec2c04e387d09bb3dde26c4824f29c",
+                url = "https://gitlab.com/tboox/xmake-repo.git"
+            },
+            version = "v3.12.0"
+        },
         ["rapidcsv#31fecfc4"] = {
             repo = {
                 branch = "master",

@@ -26,19 +26,46 @@ namespace Hooks
 			if (!armor) {
 				continue;
 			}
-			switch (armor->GetSlotMask())
-			{
-			case RE::BGSBipedObjectForm::BipedObjectSlot::kBody:
-				victim->AddObjectToContainer(FormLoader::Forms::rags_chest, nullptr, 1, nullptr);
-				RE::ActorEquipManager::GetSingleton()->EquipObject(victim, FormLoader::Forms::rags_chest, nullptr, 1, armor->GetEquipSlot(), true, true, false, true);
-				break;
-			case RE::BGSBipedObjectForm::BipedObjectSlot::kFeet:
-				victim->AddObjectToContainer(FormLoader::Forms::rags_legs, nullptr, 1, nullptr);
-				RE::ActorEquipManager::GetSingleton()->EquipObject(victim, FormLoader::Forms::rags_legs, nullptr, 1, armor->GetEquipSlot(), true, true, false, true);
-				break;
-			default:
-				break;
+
+			if (Util::LoaderUtil::JSONLoader::loadedReplacements.empty()) {
+				switch (armor->GetSlotMask())
+				{
+				case RE::BGSBipedObjectForm::BipedObjectSlot::kBody:
+					victim->AddObjectToContainer(FormLoader::Forms::rags_chest, nullptr, 1, nullptr);
+					RE::ActorEquipManager::GetSingleton()->EquipObject(victim, FormLoader::Forms::rags_chest, nullptr, 1, armor->GetEquipSlot(), true, true, false, true);
+					break;
+				case RE::BGSBipedObjectForm::BipedObjectSlot::kFeet:
+					victim->AddObjectToContainer(FormLoader::Forms::rags_legs, nullptr, 1, nullptr);
+					RE::ActorEquipManager::GetSingleton()->EquipObject(victim, FormLoader::Forms::rags_legs, nullptr, 1, armor->GetEquipSlot(), true, true, false, true);
+					break;
+				default:
+					break;
+				}
 			}
+			else {
+				auto replIt = Util::LoaderUtil::JSONLoader::loadedReplacements.find(armor);
+				if (replIt != Util::LoaderUtil::JSONLoader::loadedReplacements.end() && replIt->second) {
+					victim->AddObjectToContainer(replIt->second->As<RE::TESBoundObject>(), nullptr, 1, nullptr);
+					RE::ActorEquipManager::GetSingleton()->EquipObject(victim, replIt->second->As<RE::TESBoundObject>(), nullptr, 1, armor->GetEquipSlot(), true, true, false, true);
+				}
+				else {
+					switch (armor->GetSlotMask())
+					{
+					case RE::BGSBipedObjectForm::BipedObjectSlot::kBody:
+						victim->AddObjectToContainer(FormLoader::Forms::rags_chest, nullptr, 1, nullptr);
+						RE::ActorEquipManager::GetSingleton()->EquipObject(victim, FormLoader::Forms::rags_chest, nullptr, 1, armor->GetEquipSlot(), true, true, false, true);
+						break;
+					case RE::BGSBipedObjectForm::BipedObjectSlot::kFeet:
+						victim->AddObjectToContainer(FormLoader::Forms::rags_legs, nullptr, 1, nullptr);
+						RE::ActorEquipManager::GetSingleton()->EquipObject(victim, FormLoader::Forms::rags_legs, nullptr, 1, armor->GetEquipSlot(), true, true, false, true);
+						break;
+					default:
+						break;
+					}
+				}
+			}
+
+			
 		}
 	}
 

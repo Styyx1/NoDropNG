@@ -3,6 +3,7 @@ set_xmakever("2.8.2")
 
 -- includes
 includes("lib/commonlibsse-ng")
+includes("extern")
 
 -- set project
 set_project("drop-chances")
@@ -23,6 +24,8 @@ set_config("commonlib_toml", true)
 set_config("rex_json", true)
 set_config("rex_toml", true)
 
+add_requires("nlohmann_json", {configs = {header_only = true}})
+
 -- add rules
 add_rules("mode.debug", "mode.releasedbg")
 add_rules("plugin.vsxmake.autoupdate")
@@ -31,6 +34,7 @@ add_rules("plugin.vsxmake.autoupdate")
 target("drop-chances")
     -- add dependencies to target
     add_deps("commonlibsse-ng")
+    add_packages("nlohmann_json")
 
     -- add commonlibsse-ng plugin
     add_rules("commonlibsse-ng.plugin", {

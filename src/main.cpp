@@ -1,5 +1,6 @@
 #include "hooks.h"
 #include "config.h"
+#include "utility.h"
 
 void InitListener(SKSE::MessagingInterface::Message* a_msg) {
 
@@ -10,6 +11,8 @@ void InitListener(SKSE::MessagingInterface::Message* a_msg) {
 	case SKSE::MessagingInterface::kDataLoaded:
 		FormLoader::Forms::LoadForms();
 		Hooks::OnDeathDropChance::GetSingleton()->Register();
+		Util::LoaderUtil::JSONLoader::LoadReplacements();
+		
 		break;
 
 	case SKSE::MessagingInterface::kPostLoadGame:
