@@ -55,6 +55,8 @@ namespace Config {
 		static inline REX::TOML::Bool always_drop_enchanted{ "Drops.Settings", "bAlwaysDropEnchanted", false };
 		static inline REX::TOML::Bool log_to_file{ "Logging", "bLogToFile", false };
 
+		static inline REX::TOML::Bool only_use_json{ "Drops.Settings", "bOnlyUseJson", false };
+
 		void Update() {
 			logs::info("Loading settings...");
 			const auto toml = REX::TOML::SettingStore::GetSingleton();

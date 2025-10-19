@@ -14,12 +14,30 @@ namespace Hooks {
 
 		void Register()
 		{
-			logs::info("Registering Event");
 			const auto script = RE::ScriptEventSourceHolder::GetSingleton();
 			script->AddEventSink<RE::TESDeathEvent>(this);
+			logs::info("Registered {}"sv, typeid(RE::TESDeathEvent).name());
 		}
 		void ReplaceArmors(RE::Actor* victim);
 		EventResult ProcessEvent(const RE::TESDeathEvent* a_event, RE::BSTEventSource<RE::TESDeathEvent>*) override;
 
 	};
+
+
+
+	//struct ContainerMenuLootPrevent : public REX::Singleton<ContainerMenuLootPrevent> {
+
+	//	void InstallHook();
+
+	//	static RE::UI_MESSAGE_RESULTS ProcessMenu(RE::ContainerMenu* a_this, RE::UIMessage& a_message);
+	//	static inline REL::Relocation<decltype(&ProcessMenu)> func;
+
+	//	static inline void InvalidateListData(RE::GFxMovieView* a_list, const char* a_method, RE::FxResponseArgs<0>& a_responseArgs)
+	//	{
+	//		using func_t = decltype(&InvalidateListData);
+	//		static REL::Relocation<func_t> func{ REL::ID(82640) };
+	//		return func(a_list, a_method, a_responseArgs);
+	//	};
+
+	//};
 }

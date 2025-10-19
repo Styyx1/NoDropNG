@@ -114,7 +114,6 @@ namespace Hooks
 				}
 				continue;
 			}
-
 			auto entryData = item.second.second.get();
 			switch (item.first->formType.get()) {
 			case RE::FormType::Weapon:
@@ -148,6 +147,14 @@ namespace Hooks
 							}
 							continue;
 						}
+
+						if (Config::Settings::only_use_json.GetValue() && !Util::LoaderUtil::JSONLoader::loadedReplacements.contains(item.first->As<RE::TESForm>())) {
+							if (Config::Settings::log_to_file.GetValue()) {
+								logs::info("Skipping {} because it is not in the json", item.second.second.get()->GetDisplayName());
+							}
+							continue;
+						}
+
 						int chance = 0;
 						if (item.first->HasKeywordByEditorID("ArmorJewelry")) {
 							chance = Config::Settings::drop_removal_chance_jewelry.GetValue();
@@ -159,7 +166,7 @@ namespace Hooks
 						}						
 						if (Util::RandomGenerator::GetRandomFloat(0.0f, 100.0f) < static_cast<float>(chance)) {
 							if (Config::Settings::replace_armors.GetValue()) {
-								dropData->itemsToRemove[actor].insert(item.first);
+								dropData->itemsToRemove[actor].insert(item.first);	
 							}
 							actor->RemoveItem(item.first, item.second.first, RE::ITEM_REMOVE_REASON::kRemove, nullptr, nullptr);
 							if (Config::Settings::log_to_file.GetValue()) {
@@ -182,5 +189,61 @@ namespace Hooks
 		}
 		return EventResult::kContinue;
 	}
+
+//	void ContainerMenuLootPrevent::InstallHook()
+//	{
+//		/*REL::Relocation<std::uintptr_t> ContainerVTABLE{ RE::VTABLE_ContainerMenu[0] };
+//		func = ContainerVTABLE.write_vfunc(0x04, ProcessMenu);
+//		logs::info("Hook:Container ProcessMenu");*/
+//	}
+//#undef GetObject
+//
+//	
+//
+//	RE::UI_MESSAGE_RESULTS ContainerMenuLootPrevent::ProcessMenu(RE::ContainerMenu* a_this, RE::UIMessage& a_message)
+//	{
+//		
+//		if (a_this->GetContainerMode() == RE::ContainerMenu::ContainerMode::kLoot) {	
+//			auto itemList = a_this->GetRuntimeData().itemList;
+//			if(!itemList)
+//				return func(a_this, a_message);
+//
+//			auto& list = itemList->items;
+//			if(list.empty())
+//				return func(a_this, a_message);
+//			
+//
+//
+//			
+//			for (auto it = list.begin(); it != list.end(); ++it) {
+//				auto&& item = *it;
+//				if (item) {
+//					//logs::info("item is: {}", item->data.objDesc->GetDisplayName());
+//					if (item && item->data.objDesc->GetObject()->HasKeywordByEditorID("ArmorHeavy")) {
+//						auto& gfxVal = item->obj;
+//						if (gfxVal.IsObject()) {
+//							RE::GFxValue hide;
+//							gfxVal.GetMember("bDontHide", &hide);
+//
+//							logs::info("hide is: {}", std::to_underlying(hide.GetType()));
+//
+//							if (hide.IsBool()) {
+//								logs::info("it's a bool");
+//								hide.SetBoolean(false);
+//							}
+//						}
+//
+//						
+//						//list.erase(&item);
+//
+//						
+//					}
+//					
+//				}				
+//			}
+//			itemList->view.get()->Invoke("InvalidateListData", &itemList->entryList, 0,0);
+//		}
+//		return func(a_this, a_message);
+//	}
 }
 

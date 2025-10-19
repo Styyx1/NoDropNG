@@ -11,7 +11,10 @@ void InitListener(SKSE::MessagingInterface::Message* a_msg) {
 	case SKSE::MessagingInterface::kDataLoaded:
 		FormLoader::Forms::LoadForms();
 		Hooks::OnDeathDropChance::GetSingleton()->Register();
-		Util::LoaderUtil::JSONLoader::LoadReplacements();
+		if (Config::Settings::load_replacer_json.GetValue()) {
+			Util::LoaderUtil::JSONLoader::LoadReplacements();
+		}
+		
 		
 		break;
 
