@@ -23,8 +23,6 @@ namespace Hooks {
 
 	};
 
-
-
 	//struct ContainerMenuLootPrevent : public REX::Singleton<ContainerMenuLootPrevent> {
 
 	//	void InstallHook();

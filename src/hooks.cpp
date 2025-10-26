@@ -17,6 +17,7 @@ namespace Hooks
 		if (it == dropData->itemsToRemove.end() || it->second.empty()) {
 			return;
 		}
+		auto equip_manager = RE::ActorEquipManager::GetSingleton();
 		auto& replaceList = it->second;
 		for (auto gear : replaceList) {
 			if (!gear) {
@@ -32,11 +33,11 @@ namespace Hooks
 				{
 				case RE::BGSBipedObjectForm::BipedObjectSlot::kBody:
 					victim->AddObjectToContainer(FormLoader::Forms::rags_chest, nullptr, 1, nullptr);
-					RE::ActorEquipManager::GetSingleton()->EquipObject(victim, FormLoader::Forms::rags_chest, nullptr, 1, armor->GetEquipSlot(), true, true, false, true);
+					equip_manager->EquipObject(victim, FormLoader::Forms::rags_chest, nullptr, 1, armor->GetEquipSlot(), true, true, false, true);
 					break;
 				case RE::BGSBipedObjectForm::BipedObjectSlot::kFeet:
 					victim->AddObjectToContainer(FormLoader::Forms::rags_legs, nullptr, 1, nullptr);
-					RE::ActorEquipManager::GetSingleton()->EquipObject(victim, FormLoader::Forms::rags_legs, nullptr, 1, armor->GetEquipSlot(), true, true, false, true);
+					equip_manager->EquipObject(victim, FormLoader::Forms::rags_legs, nullptr, 1, armor->GetEquipSlot(), true, true, false, true);
 					break;
 				default:
 					break;
@@ -46,18 +47,19 @@ namespace Hooks
 				auto replIt = Util::LoaderUtil::JSONLoader::loadedReplacements.find(armor);
 				if (replIt != Util::LoaderUtil::JSONLoader::loadedReplacements.end() && replIt->second) {
 					victim->AddObjectToContainer(replIt->second->As<RE::TESBoundObject>(), nullptr, 1, nullptr);
-					RE::ActorEquipManager::GetSingleton()->EquipObject(victim, replIt->second->As<RE::TESBoundObject>(), nullptr, 1, armor->GetEquipSlot(), true, true, false, true);
+					equip_manager->EquipObject(victim, replIt->second->As<RE::TESObjectARMO>());
+					logs::info("{} has {} {} equipped", victim->GetName(), replIt->second->GetName(), victim->GetWornArmor(replIt->second->As<RE::TESObjectARMO>()->GetSlotMask(), false) == replIt->second ? "indeed" : "not");
 				}
 				else {
 					switch (armor->GetSlotMask())
 					{
 					case RE::BGSBipedObjectForm::BipedObjectSlot::kBody:
 						victim->AddObjectToContainer(FormLoader::Forms::rags_chest, nullptr, 1, nullptr);
-						RE::ActorEquipManager::GetSingleton()->EquipObject(victim, FormLoader::Forms::rags_chest, nullptr, 1, armor->GetEquipSlot(), true, true, false, true);
+						equip_manager->EquipObject(victim, FormLoader::Forms::rags_chest, nullptr, 1, armor->GetEquipSlot(), true, true, false, true);
 						break;
 					case RE::BGSBipedObjectForm::BipedObjectSlot::kFeet:
 						victim->AddObjectToContainer(FormLoader::Forms::rags_legs, nullptr, 1, nullptr);
-						RE::ActorEquipManager::GetSingleton()->EquipObject(victim, FormLoader::Forms::rags_legs, nullptr, 1, armor->GetEquipSlot(), true, true, false, true);
+						equip_manager->EquipObject(victim, FormLoader::Forms::rags_legs, nullptr, 1, armor->GetEquipSlot(), true, true, false, true);
 						break;
 					default:
 						break;
@@ -80,7 +82,7 @@ namespace Hooks
 		if (!actor || actor->IsPlayerTeammate()) {
 			return EventResult::kContinue;
 		}
-		if (actor->IsEssential() || actor->IsDead(false)) {
+		if (actor->IsEssential()) {
 			return EventResult::kContinue;
 		}
 		auto actorInventory = actor->GetInventory();
@@ -190,7 +192,7 @@ namespace Hooks
 		return EventResult::kContinue;
 	}
 
-//	void ContainerMenuLootPrevent::InstallHook()
+	//	void ContainerMenuLootPrevent::InstallHook()
 //	{
 //		/*REL::Relocation<std::uintptr_t> ContainerVTABLE{ RE::VTABLE_ContainerMenu[0] };
 //		func = ContainerVTABLE.write_vfunc(0x04, ProcessMenu);
